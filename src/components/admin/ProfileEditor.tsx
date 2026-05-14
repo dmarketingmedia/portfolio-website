@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Save, Plus, Trash2, Loader2, CheckCircle2, Camera, Upload } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
+import Image from 'next/image';
 
 interface Skill {
   name: string;
@@ -139,10 +140,9 @@ const ProfileEditor: React.FC = () => {
         {/* Profile Image Upload */}
         <div className="md:col-span-2 flex flex-col items-center gap-6 p-8 bg-zinc-900/50 border border-zinc-800 rounded-3xl">
           <div className="relative group">
-            <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-zinc-800 group-hover:border-indigo-500/50 transition-all duration-300">
+            <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-zinc-800 group-hover:border-indigo-500/50 transition-all duration-300 relative">
               {data.profileImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={data.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                <Image src={data.profileImage} alt="Profile" fill className="object-cover" sizes="128px" />
               ) : (
                 <div className="w-full h-full bg-zinc-800 flex items-center justify-center text-zinc-500">
                   <Camera size={40} />

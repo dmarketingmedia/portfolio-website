@@ -2,11 +2,14 @@ import React from 'react';
 import { Metadata } from 'next';
 import { Calendar, Tag, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import dbConnect from '@/lib/mongodb';
 import Blog from '@/models/Blog';
 import '@/models/Category';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+
+const Footer = dynamic(() => import('@/components/Footer'));
 
 async function getBlogPost(slug: string) {
   await dbConnect();
@@ -61,11 +64,14 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             <h1 className="text-4xl md:text-6xl font-black mb-8 leading-[1.1] tracking-tight">
               {blog.title}
             </h1>
-            <div className="w-full h-[400px] md:h-[500px] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl">
-              <img 
+            <div className="w-full h-[400px] md:h-[500px] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl relative">
+              <Image 
                 src={blog.coverImage} 
                 alt={blog.title} 
-                className="w-full h-full object-cover"
+                fill
+                priority
+                className="object-cover"
+                sizes="(max-width: 896px) 100vw, 896px"
               />
             </div>
           </header>

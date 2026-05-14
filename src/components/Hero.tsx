@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Globe, User, Mail } from 'lucide-react';
+import Image from 'next/image';
 
 interface HeroProps {
   name: string;
@@ -83,9 +84,15 @@ const Hero: React.FC<HeroProps> = ({ name, headline, profileImage, socialLinks }
               transition={{ duration: 0.8, delay: 0.2 }}
               className="mb-10 relative"
             >
-              <div className="w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden border-2 border-purple-500/50 shadow-[0_0_50px_rgba(168,85,247,0.4)]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={profileImage} alt={name} className="w-full h-full object-cover" />
+              <div className="w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden border-2 border-purple-500/50 shadow-[0_0_50px_rgba(168,85,247,0.4)] relative">
+                <Image 
+                  src={profileImage} 
+                  alt={name} 
+                  fill 
+                  priority 
+                  className="object-cover"
+                  sizes="(max-width: 768px) 192px, 224px"
+                />
               </div>
             </motion.div>
           )}

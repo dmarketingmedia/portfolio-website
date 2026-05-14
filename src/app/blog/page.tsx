@@ -4,8 +4,11 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Calendar, Tag, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+
+const Footer = dynamic(() => import('@/components/Footer'));
 
 const BlogPage = () => {
   const [blogs, setBlogs] = useState<any[]>([]);
@@ -79,10 +82,13 @@ const BlogPage = () => {
                 className="bg-zinc-900/50 border border-zinc-800 rounded-[2rem] overflow-hidden group hover:border-zinc-700 transition-all flex flex-col"
               >
                 <div className="relative h-56 overflow-hidden">
-                  <img 
+                  <Image 
                     src={blog.coverImage} 
                     alt={blog.title} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    fill
+                    priority={i < 3}
+                    className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                   <div className="absolute top-4 left-4">
                     <span className="bg-indigo-600 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">

@@ -1,19 +1,21 @@
 export const revalidate = 60;
 
 import React from 'react';
+import dynamic from 'next/dynamic';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
-import About from '@/components/About';
-import Skills from '@/components/Skills';
-import FeedbackSlider from '@/components/FeedbackSlider';
-import ContactForm from '@/components/ContactForm';
-import Footer from '@/components/Footer';
 import dbConnect from '@/lib/mongodb';
 import Profile from '@/models/Profile';
 import Settings from '@/models/Settings';
 import Navigation from '@/models/Navigation';
 import Feedback from '@/models/Feedback';
 import PageWrapper from '@/components/PageWrapper';
+
+const About = dynamic(() => import('@/components/About'));
+const Skills = dynamic(() => import('@/components/Skills'));
+const FeedbackSlider = dynamic(() => import('@/components/FeedbackSlider'));
+const ContactForm = dynamic(() => import('@/components/ContactForm'));
+const Footer = dynamic(() => import('@/components/Footer'));
 
 async function getPortfolioData() {
   await dbConnect();
