@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   
   // টার্মিনালে চেক করার জন্য এই লগটা দিলাম
-  console.log("🛡️ Middleware checking path:", path); 
+  console.log("🛡️ Proxy checking path:", path); 
 
   if (path.startsWith('/admin')) {
     const token = request.cookies.get('admin_token')?.value;
