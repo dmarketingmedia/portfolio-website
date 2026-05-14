@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/mongodb';
 import Settings from '@/models/Settings';
 
@@ -17,6 +18,7 @@ export async function POST(request: Request) {
     await dbConnect();
     const body = await request.json();
     const settings = await Settings.create(body);
+    revalidatePath('/');
     return NextResponse.json(settings, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create settings' }, { status: 500 });
@@ -29,6 +31,7 @@ export async function PUT(request: Request) {
     const body = await request.json();
     // For settings, we usually update the first one or create if not exists
     const settings = await Settings.findOneAndUpdate({}, body, { upsert: true, new: true });
+    revalidatePath('/');
     return NextResponse.json(settings);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });
@@ -39,6 +42,7 @@ export async function DELETE() {
   try {
     await dbConnect();
     await Settings.deleteMany({});
+    revalidatePath('/');
     return NextResponse.json({ message: 'Settings deleted' });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete settings' }, { status: 500 });

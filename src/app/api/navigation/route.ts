@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/mongodb';
 import Navigation from '@/models/Navigation';
 
@@ -17,6 +18,7 @@ export async function POST(request: Request) {
     await dbConnect();
     const body = await request.json();
     const navItem = await Navigation.create(body);
+    revalidatePath('/');
     return NextResponse.json(navItem, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create navigation item' }, { status: 500 });
@@ -39,6 +41,7 @@ export async function PUT(request: Request) {
     
     const { _id, ...updateData } = body;
     const navItem = await Navigation.findByIdAndUpdate(targetId, updateData, { new: true });
+    revalidatePath('/');
     return NextResponse.json(navItem);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update navigation item' }, { status: 500 });
@@ -54,6 +57,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'ID is required' }, { status: 400 });
     }
     await Navigation.findByIdAndDelete(id);
+    revalidatePath('/');
     return NextResponse.json({ message: 'Navigation item deleted' });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete navigation item' }, { status: 500 });
