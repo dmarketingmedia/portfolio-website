@@ -62,6 +62,7 @@ const Hero: React.FC<HeroProps> = ({ name, headline, profileImage, socialLinks }
                   alt={name} 
                   fill 
                   priority 
+                  fetchPriority="high"
                   className="object-cover"
                   sizes="(max-width: 768px) 192px, 224px"
                 />

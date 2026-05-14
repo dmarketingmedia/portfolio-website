@@ -1,6 +1,6 @@
 export const revalidate = 60;
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
@@ -20,24 +20,34 @@ const Footer = dynamic(() => import('@/components/Footer'));
 async function getPortfolioData() {
   await dbConnect();
   
-  // Use lean() to get plain JavaScript objects
-  const [profile, settings, navItems, feedbacks] = await Promise.all([
+  const [profile, settings, feedbacks] = await Promise.all([
     Profile.findOne().lean(),
     Settings.findOne().lean(),
-    Navigation.find().sort({ displayOrder: 1 }).lean(),
     Feedback.find({ isApproved: true }).lean()
   ]);
 
   return {
     profile: JSON.parse(JSON.stringify(profile)),
     settings: JSON.parse(JSON.stringify(settings)),
-    navItems: JSON.parse(JSON.stringify(navItems)),
     feedbacks: JSON.parse(JSON.stringify(feedbacks))
   };
 }
 
-export default async function PortfolioPage() {
-  const { profile, settings, navItems, feedbacks } = await getPortfolioData();
+const PortfolioSkeleton = () => (
+  <div className="min-h-screen bg-[#050510] animate-pulse">
+    <div className="max-w-7xl mx-auto px-6 pt-32">
+      <div className="h-[500px] bg-white/5 rounded-[3rem] mb-12" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="h-64 bg-white/5 rounded-[2rem]" />
+        <div className="h-64 bg-white/5 rounded-[2rem]" />
+        <div className="h-64 bg-white/5 rounded-[2rem]" />
+      </div>
+    </div>
+  </div>
+);
+
+async function DynamicPortfolio() {
+  const { profile, settings, feedbacks } = await getPortfolioData();
 
   if (!profile || !settings) {
     return (
@@ -56,9 +66,7 @@ export default async function PortfolioPage() {
   };
 
   return (
-    <PageWrapper className="bg-[#050510] min-h-screen selection:bg-indigo-500/30 selection:text-white">
-      <Navbar />
-      
+    <>
       {isSectionActive('Hero') && (
         <Hero 
           name={profile.name} 
@@ -89,6 +97,17 @@ export default async function PortfolioPage() {
       )}
 
       <Footer siteName={settings.siteName} socialLinks={settings.socialLinks} />
+    </>
+  );
+}
+
+export default function PortfolioPage() {
+  return (
+    <PageWrapper className="bg-[#050510] min-h-screen selection:bg-indigo-500/30 selection:text-white">
+      <Navbar />
+      <Suspense fallback={<PortfolioSkeleton />}>
+        <DynamicPortfolio />
+      </Suspense>
     </PageWrapper>
   );
 }
