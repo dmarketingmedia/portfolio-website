@@ -119,7 +119,7 @@ const BlogPage = () => {
         </div>
       </section>
 
-      <Footer />
+      <Footer siteName="D Marketing Media" />
     </div>
   );
 };
