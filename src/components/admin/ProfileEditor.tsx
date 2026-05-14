@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Save, Plus, Trash2, Loader2, CheckCircle2, Camera, Upload } from 'lucide-react';
+import imageCompression from 'browser-image-compression';
 
 interface Skill {
   name: string;
@@ -22,6 +23,7 @@ interface ProfileData {
 const ProfileEditor: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [compressing, setCompressing] = useState(false);
   const [success, setSuccess] = useState(false);
   const [data, setData] = useState<ProfileData>({
     name: '',
@@ -51,14 +53,27 @@ const ProfileEditor: React.FC = () => {
     void fetchProfile();
   }, [fetchProfile]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setData({ ...data, profileImage: reader.result as string });
-      };
-      reader.readAsDataURL(file);
+      setCompressing(true);
+      try {
+        const options = {
+          maxSizeMB: 0.9,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        };
+        const compressedFile = await imageCompression(file, options);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setData({ ...data, profileImage: reader.result as string });
+          setCompressing(false);
+        };
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        console.error('Image compression failed:', error);
+        setCompressing(false);
+      }
     }
   };
 
@@ -112,11 +127,11 @@ const ProfileEditor: React.FC = () => {
         </div>
         <button
           onClick={handleSave}
-          disabled={saving}
+          disabled={saving || compressing}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl transition-all duration-200 disabled:opacity-50 shadow-[0_0_20px_rgba(79,70,229,0.2)]"
         >
-          {saving ? <Loader2 size={18} className="animate-spin" /> : success ? <CheckCircle2 size={18} /> : <Save size={18} />}
-          {saving ? 'Saving...' : success ? 'Saved!' : 'Save Changes'}
+          {saving || compressing ? <Loader2 size={18} className="animate-spin" /> : success ? <CheckCircle2 size={18} /> : <Save size={18} />}
+          {saving ? 'Saving...' : compressing ? 'Compressing...' : success ? 'Saved!' : 'Save Changes'}
         </button>
       </div>
 
