@@ -50,13 +50,19 @@ const ContactForm: React.FC = () => {
             
             <div className="space-y-6">
               {[
-                { label: 'Email', value: 'hello@fahadmahbub.com' },
+                { label: 'Email', value: 'smfahadmahbub@outlook.com' },
                 { label: 'Location', value: 'Dhaka, Bangladesh' },
                 { label: 'Availability', value: 'Mon - Fri, 9am - 6pm' }
               ].map((item) => (
                 <div key={item.label}>
                   <p className="text-[10px] uppercase tracking-widest text-zinc-600 font-bold mb-1">{item.label}</p>
-                  <p className="text-lg text-white font-bold">{item.value}</p>
+                  {item.label === 'Email' ? (
+                    <a href={`mailto:${item.value}`} className="text-lg text-white font-bold hover:text-indigo-400 transition-colors">
+                      {item.value}
+                    </a>
+                  ) : (
+                    <p className="text-lg text-white font-bold">{item.value}</p>
+                  )}
                 </div>
               ))}
             </div>
