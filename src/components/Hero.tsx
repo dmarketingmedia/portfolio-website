@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Globe, User, Mail } from 'lucide-react';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
+
+const Stars = dynamic(() => import('./Stars'), { ssr: false });
 
 interface HeroProps {
   name: string;
@@ -13,12 +16,6 @@ interface HeroProps {
 }
 
 const Hero: React.FC<HeroProps> = ({ name, headline, profileImage, socialLinks }) => {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const getIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
       case 'github': return Globe;
@@ -36,33 +33,8 @@ const Hero: React.FC<HeroProps> = ({ name, headline, profileImage, socialLinks }
         <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-600/20 rounded-full blur-[120px]"></div>
       </div>
 
-      {/* 2. Twinkling Stars (Hydration-safe) */}
-      {mounted && (
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          {[...Array(150)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-              style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                width: `${Math.random() * 2 + 1}px`,
-                height: `${Math.random() * 2 + 1}px`,
-              }}
-              animate={{
-                opacity: [0, 0.8, 0],
-                scale: [0.8, 1.2, 0.8],
-              }}
-              transition={{
-                duration: Math.random() * 3 + 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: Math.random() * 5,
-              }}
-            />
-          ))}
-        </div>
-      )}
+      {/* 2. Twinkling Stars (Hydration-safe via next/dynamic) */}
+      <Stars />
 
       {/* 3. Main Content Wrapper */}
       <div className="relative z-10 w-full flex flex-col items-center justify-center px-6 pt-20">
