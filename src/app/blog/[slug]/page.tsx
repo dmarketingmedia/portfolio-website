@@ -97,7 +97,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
         </div>
       </article>
 
-      <Footer />
+      <Footer siteName="D Marketing Media" />
     </div>
   );
 }
