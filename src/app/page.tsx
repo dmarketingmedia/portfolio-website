@@ -1,7 +1,9 @@
+export const dynamic = 'force-static';
 export const revalidate = 3600;
 
 import React, { Suspense } from 'react';
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
+import { unstable_cache } from 'next/cache';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import dbConnect from '@/lib/mongodb';
@@ -11,30 +13,35 @@ import Feedback from '@/models/Feedback';
 import PageWrapper from '@/components/PageWrapper';
 import MarketingGraphLoader from '@/components/MarketingGraphLoader';
 
-const About = dynamic(() => import('@/components/About'), { ssr: true });
-const Skills = dynamic(() => import('@/components/Skills'), { ssr: true });
-const FeedbackSlider = dynamic(() => import('@/components/FeedbackSlider'), { ssr: true });
-const ContactForm = dynamic(() => import('@/components/ContactForm'), { ssr: true });
-const Footer = dynamic(() => import('@/components/Footer'), { ssr: true });
+const About = dynamicImport(() => import('@/components/About'), { ssr: true });
+const Skills = dynamicImport(() => import('@/components/Skills'), { ssr: true });
+const FeedbackSlider = dynamicImport(() => import('@/components/FeedbackSlider'), { ssr: true });
+const ContactForm = dynamicImport(() => import('@/components/ContactForm'), { ssr: true });
+const Footer = dynamicImport(() => import('@/components/Footer'), { ssr: true });
 
-async function getPortfolioData() {
-  await dbConnect();
-  
-  const [profile, settings, feedbacks] = await Promise.all([
-    Profile.findOne().lean(),
-    Settings.findOne().lean(),
-    Feedback.find({ isApproved: true }).lean()
-  ]);
+// Wrap database queries with unstable_cache to ensure they are cached during the static build
+const getCachedPortfolioData = unstable_cache(
+  async () => {
+    await dbConnect();
+    
+    const [profile, settings, feedbacks] = await Promise.all([
+      Profile.findOne().lean(),
+      Settings.findOne().lean(),
+      Feedback.find({ isApproved: true }).lean()
+    ]);
 
-  return {
-    profile: JSON.parse(JSON.stringify(profile)),
-    settings: JSON.parse(JSON.stringify(settings)),
-    feedbacks: JSON.parse(JSON.stringify(feedbacks))
-  };
-}
+    return {
+      profile: JSON.parse(JSON.stringify(profile)),
+      settings: JSON.parse(JSON.stringify(settings)),
+      feedbacks: JSON.parse(JSON.stringify(feedbacks))
+    };
+  },
+  ['portfolio-data'],
+  { revalidate: 3600, tags: ['portfolio'] }
+);
 
 async function PortfolioContent() {
-  const { profile, settings, feedbacks } = await getPortfolioData();
+  const { profile, settings, feedbacks } = await getCachedPortfolioData();
 
   if (!profile || !settings) {
     return (

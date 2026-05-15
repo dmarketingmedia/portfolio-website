@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import dbConnect from '@/lib/mongodb';
 import Feedback from '@/models/Feedback';
 
@@ -19,6 +19,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const feedback = await Feedback.create(body);
     revalidatePath('/');
+    revalidateTag('portfolio');
     return NextResponse.json(feedback, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to submit feedback' }, { status: 500 });
@@ -36,6 +37,7 @@ export async function PUT(request: Request) {
     }
     const feedback = await Feedback.findByIdAndUpdate(id, body, { new: true });
     revalidatePath('/');
+    revalidateTag('portfolio');
     return NextResponse.json(feedback);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update feedback' }, { status: 500 });
@@ -52,6 +54,7 @@ export async function DELETE(request: Request) {
     }
     await Feedback.findByIdAndDelete(id);
     revalidatePath('/');
+    revalidateTag('portfolio');
     return NextResponse.json({ message: 'Feedback deleted' });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete feedback' }, { status: 500 });
