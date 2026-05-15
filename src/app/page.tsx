@@ -18,6 +18,7 @@ const Skills = dynamicImport(() => import('@/components/Skills'), { ssr: true })
 const FeedbackSlider = dynamicImport(() => import('@/components/FeedbackSlider'), { ssr: true });
 const ContactForm = dynamicImport(() => import('@/components/ContactForm'), { ssr: true });
 const Footer = dynamicImport(() => import('@/components/Footer'), { ssr: true });
+const Stars = dynamicImport(() => import('@/components/Stars'), { ssr: false });
 
 // Wrap database queries with unstable_cache to ensure they are cached during the static build
 const getCachedPortfolioData = unstable_cache(
@@ -30,6 +31,8 @@ const getCachedPortfolioData = unstable_cache(
       Feedback.find({ isApproved: true }).lean()
     ]);
 
+    if (!profile || !settings) return null;
+
     return {
       profile: JSON.parse(JSON.stringify(profile)),
       settings: JSON.parse(JSON.stringify(settings)),
@@ -41,9 +44,9 @@ const getCachedPortfolioData = unstable_cache(
 );
 
 async function PortfolioContent() {
-  const { profile, settings, feedbacks } = await getCachedPortfolioData();
+  const data = await getCachedPortfolioData();
 
-  if (!profile || !settings) {
+  if (!data) {
     return (
       <div className="min-h-screen bg-[#050510] flex items-center justify-center text-zinc-500">
         <div className="text-center">
@@ -53,6 +56,8 @@ async function PortfolioContent() {
       </div>
     );
   }
+
+  const { profile, settings, feedbacks } = data;
 
   const isSectionActive = (name: string) => {
     const section = settings.sectionsStatus?.find((s: any) => s.sectionName === name);
@@ -97,11 +102,23 @@ async function PortfolioContent() {
 
 export default function PortfolioPage() {
   return (
-    <PageWrapper className="bg-[#050510] min-h-screen selection:bg-indigo-500/30 selection:text-white">
+    <main className="bg-[#050510] min-h-screen selection:bg-indigo-500/30 selection:text-white relative overflow-hidden">
+      {/* 1. Instant Static Background Shell */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-600/20 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-600/10 rounded-full blur-[120px]"></div>
+        <Suspense fallback={null}>
+          <Stars />
+        </Suspense>
+      </div>
+
       <Navbar />
-      <Suspense fallback={<MarketingGraphLoader />}>
-        <PortfolioContent />
-      </Suspense>
-    </PageWrapper>
+      
+      <PageWrapper>
+        <Suspense fallback={<MarketingGraphLoader />}>
+          <PortfolioContent />
+        </Suspense>
+      </PageWrapper>
+    </main>
   );
 }
