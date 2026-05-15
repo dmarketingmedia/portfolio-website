@@ -37,7 +37,7 @@ const getCachedPortfolioData = unstable_cache(
     };
   },
   ['portfolio-data'],
-  { revalidate: 3600, tags: ['portfolio'] }
+  { revalidate: 3600 }
 );
 
 async function PortfolioContent() {
