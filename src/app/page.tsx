@@ -1,6 +1,6 @@
 export const revalidate = 3600;
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
@@ -9,6 +9,7 @@ import Profile from '@/models/Profile';
 import Settings from '@/models/Settings';
 import Feedback from '@/models/Feedback';
 import PageWrapper from '@/components/PageWrapper';
+import MarketingGraphLoader from '@/components/MarketingGraphLoader';
 
 const About = dynamic(() => import('@/components/About'), { ssr: true });
 const Skills = dynamic(() => import('@/components/Skills'), { ssr: true });
@@ -19,8 +20,6 @@ const Footer = dynamic(() => import('@/components/Footer'), { ssr: true });
 async function getPortfolioData() {
   await dbConnect();
   
-  // Fetching data from database
-  // In SSG mode with revalidate, this happens at build time or in the background
   const [profile, settings, feedbacks] = await Promise.all([
     Profile.findOne().lean(),
     Settings.findOne().lean(),
@@ -34,7 +33,7 @@ async function getPortfolioData() {
   };
 }
 
-export default async function PortfolioPage() {
+async function PortfolioContent() {
   const { profile, settings, feedbacks } = await getPortfolioData();
 
   if (!profile || !settings) {
@@ -54,9 +53,7 @@ export default async function PortfolioPage() {
   };
 
   return (
-    <PageWrapper className="bg-[#050510] min-h-screen selection:bg-indigo-500/30 selection:text-white">
-      <Navbar />
-      
+    <>
       {isSectionActive('Hero') && (
         <Hero 
           name={profile.name} 
@@ -87,6 +84,17 @@ export default async function PortfolioPage() {
       )}
 
       <Footer siteName={settings.siteName || 'Portfolio'} socialLinks={settings.socialLinks} />
+    </>
+  );
+}
+
+export default function PortfolioPage() {
+  return (
+    <PageWrapper className="bg-[#050510] min-h-screen selection:bg-indigo-500/30 selection:text-white">
+      <Navbar />
+      <Suspense fallback={<MarketingGraphLoader />}>
+        <PortfolioContent />
+      </Suspense>
     </PageWrapper>
   );
 }
